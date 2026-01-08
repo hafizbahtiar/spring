@@ -1,0 +1,164 @@
+# Spring Boot Application Environment Configuration Template
+# Copy this file to .env and update values for your local development environment
+# IMPORTANT: Never commit .env files to version control
+
+# ============================================================================
+# APPLICATION SETTINGS
+# ============================================================================
+SPRING_PROFILES_ACTIVE=development
+SPRING_APPLICATION_NAME=spring
+SERVER_PORT=8080
+LOGGING_LEVEL_ROOT=INFO
+LOGGING_LEVEL_COM_HAFIZBAHTIAR_SPRING=DEBUG
+
+# ============================================================================
+# PRIMARY DATABASE: PostgreSQL
+# ============================================================================
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/console
+SPRING_DATASOURCE_USERNAME=console
+SPRING_DATASOURCE_PASSWORD=console_2025!
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+
+# JPA/Hibernate Configuration
+SPRING_JPA_DATABASE=postgresql
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+SPRING_JPA_SHOW_SQL=false
+SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+SPRING_JPA_PROPERTIES_HIBERNATE_USE_SQL_COMMENTS=true
+SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_BATCH_SIZE=20
+SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_INSERTS=true
+SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES=true
+
+# Connection Pool Configuration (HikariCP)
+SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=20
+SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT=300000
+SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1200000
+SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=20000
+
+# ============================================================================
+# SECONDARY DATABASE: MongoDB
+# ============================================================================
+SPRING_DATA_MONGODB_URI=mongodb://console:console_2025!@127.0.0.1:27017/console
+SPRING_DATA_MONGODB_DATABASE=console
+SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=console
+
+# MongoDB Connection Pool
+SPRING_DATA_MONGODB_MAX_CONNECTION_IDLE_TIME=0
+SPRING_DATA_MONGODB_MAX_CONNECTION_LIFE_TIME=0
+SPRING_DATA_MONGODB_MIN_CONNECTIONS_PER_HOST=0
+SPRING_DATA_MONGODB_MAX_CONNECTIONS_PER_HOST=100
+SPRING_DATA_MONGODB_CONNECTIONS_PER_HOST=100
+SPRING_DATA_MONGODB_THREADS_ALLOWED_TO_BLOCK_FOR_CONNECTION_MULTIPLIER=5
+
+# ============================================================================
+# FLYWAY MIGRATION (Database Schema Management)
+# ============================================================================
+SPRING_FLYWAY_ENABLED=true
+SPRING_FLYWAY_LOCATIONS=classpath:db/migration
+SPRING_FLYWAY_BASELINE_ON_MIGRATE=true
+SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
+
+# ============================================================================
+# SECURITY SETTINGS
+# ============================================================================
+# JWT Configuration
+# Note: In application.properties, use: jwt.secret=your-secret-key
+# For environment variables, use: JWT_SECRET=your-secret-key
+JWT_SECRET=your-256-bit-secret-key-change-in-production-minimum-32-characters
+JWT_EXPIRATION=86400000
+
+# Password Encryption
+SPRING_SECURITY_PASSWORD_ENCODER_STRENGTH=12
+
+# ============================================================================
+# PAYMENT PROVIDER CONFIGURATION
+# ============================================================================
+# PayPal Configuration (Sandbox)
+PAYPAL_CLIENT_ID=your-paypal-client-id
+PAYPAL_CLIENT_SECRET=your-paypal-client-secret
+PAYPAL_MODE=sandbox
+
+# Stripe Configuration (Test)
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-publishable-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+
+# ============================================================================
+# EXTERNAL SERVICE CONFIGURATION
+# ============================================================================
+# Email Service (SMTP)
+# For Gmail: Use App Password (not your regular password)
+# Generate App Password: https://myaccount.google.com/apppasswords
+# For SendGrid: Use smtp.sendgrid.net with port 587
+# For AWS SES: Use your SES SMTP endpoint
+SPRING_MAIL_HOST=smtp.gmail.com
+SPRING_MAIL_PORT=587
+SPRING_MAIL_USERNAME=your-email@gmail.com
+SPRING_MAIL_PASSWORD=your-app-password
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED=true
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT=5000
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT=5000
+SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT=5000
+
+# Email Application Configuration
+# From email address (e.g., noreply@yourapp.com)
+EMAIL_FROM=noreply@yourapp.com
+# Frontend URL for email links (e.g., http://localhost:3000 for development)
+EMAIL_FRONTEND_URL=http://localhost:3000
+# Application name displayed in emails
+EMAIL_APP_NAME=Console
+
+# Password Reset Configuration
+# Password reset token expiration (in hours, default: 1 hour)
+PASSWORD_RESET_EXPIRATION_HOURS=1
+# Maximum password reset requests per hour per user (rate limiting, default: 3)
+PASSWORD_RESET_MAX_REQUESTS_PER_HOUR=3
+
+# File Upload
+SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=10MB
+SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE=10MB
+
+# ============================================================================
+# MONITORING & LOGGING
+# ============================================================================
+# Application Monitoring
+MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,metrics,info
+MANAGEMENT_ENDPOINT_HEALTH_DB_ENABLED=true
+MANAGEMENT_ENDPOINT_HEALTH_MONGO_ENABLED=true
+
+# Logging Configuration
+LOGGING_FILE_NAME=logs/spring-app.log
+LOGGING_LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE=10MB
+LOGGING_LOGBACK_ROLLINGPOLICY_MAX_HISTORY=30
+
+# ============================================================================
+# DEVELOPMENT SPECIFIC SETTINGS
+# ============================================================================
+# H2 Console (for development/testing only - disable in production)
+SPRING_H2_CONSOLE_ENABLED=false
+
+# Swagger/OpenAPI (enable in development)
+SPRINGDOC_API_DOCS_ENABLED=true
+SPRINGDOC_SWAGGER_UI_ENABLED=true
+SPRINGDOC_SWAGGER_UI_PATH=/swagger-ui.html
+
+# CORS Configuration (restrict in production)
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4200
+CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
+CORS_ALLOWED_HEADERS=*
+
+# ============================================================================
+# PRODUCTION OVERRIDE NOTES
+# ============================================================================
+# IMPORTANT: In production, override these values with:
+# - Use environment-specific secrets management
+# - Disable debug logging and H2 console
+# - Restrict CORS origins
+# - Use secure database credentials
+# - Enable proper monitoring and alerting
+# - Configure SSL/TLS certificates
+# - Set appropriate JVM memory settings
