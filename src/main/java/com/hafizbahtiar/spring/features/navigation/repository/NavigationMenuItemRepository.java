@@ -44,6 +44,16 @@ public interface NavigationMenuItemRepository extends JpaRepository<NavigationMe
        List<NavigationMenuItem> findByGroupLabelAndActiveTrueOrderByDisplayOrderAsc(String groupLabel);
 
        /**
+        * Find distinct group labels from active menu items
+        *
+        * @return List of distinct group labels, ordered alphabetically
+        */
+       @Query("SELECT DISTINCT m.groupLabel FROM NavigationMenuItem m " +
+                     "WHERE m.active = true AND m.groupLabel IS NOT NULL AND m.groupLabel != '' " +
+                     "ORDER BY m.groupLabel ASC")
+       List<String> findDistinctGroupLabels();
+
+       /**
         * Find menu items that don't require a specific role (available to all
         * authenticated users)
         * and are active, ordered by group label and display order

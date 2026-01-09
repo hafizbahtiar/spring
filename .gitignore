@@ -36,3 +36,20 @@ build/
 .env
 .env.local
 .env.*.local
+
+### Log Files ###
+*.log
+
+### Debug Files ###
+*.trace
+*.trace.gz
+*.trace.zip
+*.trace.tar
+*.trace.tar.gz
+*.trace.tar.zip
+*.trace.tar.gz.zip
+*.trace.tar.gz.zip.gz
+*.trace.tar.gz.zip.gz.gz
+*.trace.tar.gz.zip.gz.gz.gz
+uploads/
+!uploads/.gitkeep

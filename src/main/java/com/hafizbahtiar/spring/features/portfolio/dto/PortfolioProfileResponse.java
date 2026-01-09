@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Response DTO for portfolio profile.
@@ -22,8 +23,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class PortfolioProfileResponse {
 
-    private Long id;
-    private Long userId;
+    private Long id; // Internal ID (not exposed in public APIs)
+    private UUID uuid; // Public UUID for portfolio profile identification
+    private Long userId; // Internal user ID (not exposed in public APIs)
+    private UUID userUuid; // Public UUID for user identification
 
     /**
      * User's bio or about section

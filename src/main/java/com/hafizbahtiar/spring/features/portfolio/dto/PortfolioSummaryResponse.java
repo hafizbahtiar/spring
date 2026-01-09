@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Response DTO for complete portfolio summary.
@@ -19,7 +20,8 @@ import java.util.List;
 @AllArgsConstructor
 public class PortfolioSummaryResponse {
 
-    private Long userId;
+    private Long userId; // Internal ID (not exposed in public APIs)
+    private UUID userUuid; // Public UUID for user identification
     private String username; // Optional, for public portfolio view
 
     /**

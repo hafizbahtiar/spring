@@ -21,10 +21,10 @@ import java.util.List;
 public class CorsConfig {
 
     /**
-     * Allowed origins from environment variable or default to localhost:3000
-     * (Next.js default port)
+     * Allowed origins from environment variable or default to localhost:3000, 3001, and 20251
+     * (Next.js default ports and custom port 20251)
      */
-    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
+    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:3001,http://localhost:20251}")
     private String allowedOrigins;
 
     /**

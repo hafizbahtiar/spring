@@ -37,6 +37,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -458,6 +460,85 @@ public class UserServiceImpl implements UserService {
             log.error("Failed to store avatar file for user ID: {}", userId, e);
             throw new RuntimeException("Failed to store avatar file", e);
         }
+    }
+
+    @Override
+    public Page<UserResponse> getUsersWithFilters(String search, String role, Boolean active, Pageable pageable) {
+        log.debug("Fetching users with filters: search={}, role={}, active={}, page={}, size={}",
+                search, role, active, pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<User> users = userRepository.findUsersWithFilters(
+                search != null && !search.trim().isEmpty() ? search.trim() : null,
+                role != null && !role.trim().isEmpty() ? role.trim() : null,
+                active,
+                pageable);
+
+        return users.map(userMapper::toResponse);
+    }
+
+    @Override
+    public UserResponse createUser(String email, String username, String password, String firstName,
+            String lastName, String phone, String role, Boolean active) {
+        log.info("Admin creating new user with email: {}, username: {}, role: {}", email, username, role);
+
+        // Validate role - cannot create OWNER via admin API
+        if ("OWNER".equalsIgnoreCase(role)) {
+            throw new IllegalArgumentException(
+                    "Cannot create user with OWNER role. OWNER role is unique and cannot be assigned.");
+        }
+
+        // Check if email already exists
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw UserAlreadyExistsException.email(email);
+        }
+
+        // Check if username already exists
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
+            throw UserAlreadyExistsException.username(username);
+        }
+
+        // Create user entity
+        User user = new User(email, username, passwordEncoder.encode(password));
+        if (firstName != null)
+            user.setFirstName(firstName);
+        if (lastName != null)
+            user.setLastName(lastName);
+        if (phone != null)
+            user.setPhone(phone);
+        if (role != null)
+            user.setRole(role.toUpperCase());
+        if (active != null)
+            user.setActive(active);
+
+        User savedUser = userRepository.save(user);
+        log.info("User created successfully by admin with ID: {}", savedUser.getId());
+
+        return userMapper.toResponse(savedUser);
+    }
+
+    @Override
+    public UserResponse updateUserActiveStatus(Long id, Boolean active) {
+        log.debug("Updating active status for user ID: {} to {}", id, active);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> UserNotFoundException.byId(id));
+
+        if (active != null) {
+            if (active) {
+                user.activate();
+            } else {
+                // Prevent deactivating OWNER
+                if ("OWNER".equalsIgnoreCase(user.getRole())) {
+                    throw new IllegalArgumentException(
+                            "Cannot deactivate user with OWNER role. OWNER role is unique and must remain active.");
+                }
+                user.deactivate();
+            }
+            userRepository.save(user);
+            log.info("User active status updated for ID: {} to {}", id, active);
+        }
+
+        return userMapper.toResponse(user);
     }
 
     /**

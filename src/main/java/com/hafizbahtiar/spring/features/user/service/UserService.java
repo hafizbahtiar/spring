@@ -4,6 +4,8 @@ import com.hafizbahtiar.spring.features.user.dto.UserProfileResponse;
 import com.hafizbahtiar.spring.features.user.dto.UserRegistrationRequest;
 import com.hafizbahtiar.spring.features.user.dto.UserResponse;
 import com.hafizbahtiar.spring.features.user.dto.UserUpdateRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -84,7 +86,7 @@ public interface UserService {
      * Update user role with OWNER uniqueness validation.
      * This method validates that only one user can have the OWNER role at a time.
      *
-     * @param userId User ID to update
+     * @param userId  User ID to update
      * @param newRole New role to assign (USER, OWNER, ADMIN)
      * @return Updated UserResponse
      */
@@ -102,10 +104,46 @@ public interface UserService {
     /**
      * Upload avatar for user (via URL or file).
      *
-     * @param userId  User ID
+     * @param userId    User ID
      * @param avatarUrl Avatar URL (if provided)
-     * @param file    MultipartFile (if provided, optional)
+     * @param file      MultipartFile (if provided, optional)
      * @return Updated UserResponse
      */
     UserResponse uploadAvatar(Long userId, String avatarUrl, org.springframework.web.multipart.MultipartFile file);
+
+    /**
+     * Get paginated list of users with filters (for admin).
+     *
+     * @param search   Search term (email, username, firstName, lastName)
+     * @param role     Filter by role
+     * @param active   Filter by active status
+     * @param pageable Pagination parameters
+     * @return Page of UserResponse
+     */
+    Page<UserResponse> getUsersWithFilters(String search, String role, Boolean active, Pageable pageable);
+
+    /**
+     * Create a new user (admin only).
+     *
+     * @param email     User email
+     * @param username  User username
+     * @param password  User password (will be hashed)
+     * @param firstName First name
+     * @param lastName  Last name
+     * @param phone     Phone number
+     * @param role      User role (USER or ADMIN, not OWNER)
+     * @param active    Active status
+     * @return Created UserResponse
+     */
+    UserResponse createUser(String email, String username, String password, String firstName, String lastName,
+            String phone, String role, Boolean active);
+
+    /**
+     * Update user active status.
+     *
+     * @param id     User ID
+     * @param active Active status
+     * @return Updated UserResponse
+     */
+    UserResponse updateUserActiveStatus(Long id, Boolean active);
 }

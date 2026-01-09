@@ -8,11 +8,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_email", columnList = "email"),
         @Index(name = "idx_users_username", columnList = "username"),
+        @Index(name = "idx_users_uuid", columnList = "uuid", unique = true),
         @Index(name = "idx_users_active", columnList = "active"),
         @Index(name = "idx_users_role", columnList = "role"),
         @Index(name = "idx_users_email_active", columnList = "email, active"),
@@ -27,6 +29,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * Public UUID for user identification (exposed in APIs)
+     * Generated automatically on creation via @PrePersist
+     */
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID uuid;
 
     @Column(nullable = false, length = 255, unique = true)
     private String email;
@@ -91,6 +100,16 @@ public class User {
     @Version
     @Column(nullable = false)
     private Long version = 0L;
+
+    /**
+     * Generate UUID before persisting if not already set
+     */
+    @PrePersist
+    protected void generateUuid() {
+        if (this.uuid == null) {
+            this.uuid = UUID.randomUUID();
+        }
+    }
 
     // Constructor for registration
     public User(String email, String username, String passwordHash) {

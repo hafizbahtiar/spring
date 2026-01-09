@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
 
     private Long id;
+    private UUID uuid;
     private String email;
     private String username;
     private String firstName;
@@ -45,6 +47,7 @@ public class UserResponse {
     @AllArgsConstructor
     public static class Summary {
         private Long id;
+        private UUID uuid;
         private String email;
         private String username;
         private String fullName;

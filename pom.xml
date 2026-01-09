@@ -160,6 +160,25 @@
 			<version>2.0.9</version>
 		</dependency>
 
+		<!-- Jackson JSR310 module for Java 8 time types (LocalDateTime, etc.) -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
+
+		<!-- Netty DNS resolver for macOS (fixes DNS resolution warnings on macOS) -->
+		<!-- Note: This dependency is optional but recommended for macOS users. -->
+		<!-- For macOS ARM (Apple Silicon/M1/M2/M3), use osx-aarch_64 classifier -->
+		<!-- For macOS Intel, use osx-x86_64 classifier -->
+		<!-- The version should match the Netty version used by netty-socketio (check transitively) -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-resolver-dns-native-macos</artifactId>
+			<version>4.1.100.Final</version>
+			<classifier>osx-aarch_64</classifier>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>

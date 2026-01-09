@@ -73,13 +73,18 @@ public class PermissionRegistryInitializer implements CommandLineRunner {
         modules.add(createModule("settings", "Settings", "Application settings module", "OWNER,ADMIN"));
 
         // Save modules (skip if already exists)
+        int createdCount = 0;
+        int existingCount = 0;
         for (PermissionModule module : modules) {
             if (!permissionModuleRepository.existsByModuleKey(module.getModuleKey())) {
                 permissionModuleRepository.save(module);
-                log.debug("Created permission module: {}", module.getModuleKey());
+                createdCount++;
             } else {
-                log.debug("Permission module already exists: {}", module.getModuleKey());
+                existingCount++;
             }
+        }
+        if (createdCount > 0 || existingCount > 0) {
+            log.info("Permission modules: {} created, {} already existed", createdCount, existingCount);
         }
 
         log.info("Initialized {} permission modules", modules.size());
@@ -132,13 +137,18 @@ public class PermissionRegistryInitializer implements CommandLineRunner {
         pages.add(createPage("settings", "preferences", "Preferences", "/settings/preferences", "User preferences"));
 
         // Save pages (skip if already exists)
+        int createdCount = 0;
+        int existingCount = 0;
         for (PermissionPage page : pages) {
             if (!permissionPageRepository.existsByModuleKeyAndPageKey(page.getModuleKey(), page.getPageKey())) {
                 permissionPageRepository.save(page);
-                log.debug("Created permission page: {}.{}", page.getModuleKey(), page.getPageKey());
+                createdCount++;
             } else {
-                log.debug("Permission page already exists: {}.{}", page.getModuleKey(), page.getPageKey());
+                existingCount++;
             }
+        }
+        if (createdCount > 0 || existingCount > 0) {
+            log.info("Permission pages: {} created, {} already existed", createdCount, existingCount);
         }
 
         log.info("Initialized {} permission pages", pages.size());
@@ -200,15 +210,19 @@ public class PermissionRegistryInitializer implements CommandLineRunner {
         components.add(createComponent("users.groups", "assign_users", "Assign Users", "BUTTON"));
 
         // Save components (skip if already exists)
+        int createdCount = 0;
+        int existingCount = 0;
         for (PermissionComponent component : components) {
             if (!permissionComponentRepository.existsByPageKeyAndComponentKey(
                     component.getPageKey(), component.getComponentKey())) {
                 permissionComponentRepository.save(component);
-                log.debug("Created permission component: {}.{}", component.getPageKey(), component.getComponentKey());
+                createdCount++;
             } else {
-                log.debug("Permission component already exists: {}.{}", component.getPageKey(),
-                        component.getComponentKey());
+                existingCount++;
             }
+        }
+        if (createdCount > 0 || existingCount > 0) {
+            log.info("Permission components: {} created, {} already existed", createdCount, existingCount);
         }
 
         log.info("Initialized {} permission components", components.size());

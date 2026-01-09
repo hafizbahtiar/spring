@@ -22,13 +22,6 @@ This document outlines the development phases and tasks required to complete the
 
 > **Goal**: Implement a flexible permission system where OWNER/ADMIN can create Groups and assign fine-grained permissions at Module, Page, and Component levels. This extends the current static role system (Layer 1) with dynamic, configurable permissions (Layer 2).
 
-**Current State:**
-
-- ✅ Layer 1 (Static Roles) is implemented: OWNER, ADMIN, USER roles exist
-- ✅ Layer 2 (Dynamic Groups & Permissions) is implemented: Dynamic permission groups, fine-grained permissions, registry management, bulk operations, import/export, search/filtering
-- ✅ Role-based access control using `@PreAuthorize` with `hasRole()`, `hasAnyRole()`, and custom permission checks
-- ✅ Dynamic permission groups with fine-grained permissions at Module, Page, and Component levels
-
 **Deferred Enhancements (Optional):**
 
 - [ ] Validation for component type consistency - **DEFERRED** (can be enhanced later)
@@ -59,24 +52,7 @@ This document outlines the development phases and tasks required to complete the
     - [ ] How to assign users to groups
     - [ ] Permission evaluation examples
 
-**Key Design Decisions (from documentation):**
-
-1. **Automatic Inheritance**: Module permission grants access to all pages/components within that module
-2. **Explicit Deny Support**: `granted = false` explicitly denies access, overriding allow permissions
-3. **OR Logic with Deny Override**: If any group allows, user has access (unless explicit deny exists)
-4. **Highest Permission Wins**: When multiple groups allow, take highest permission (READ < WRITE < DELETE)
-5. **Creator Access Validation**: Groups can only include modules/pages/components that creator has access to
-6. **Frontend + Backend Checks**: Both frontend (UX) and backend (security) checks required
-
-**Status**: ✅ **IMPLEMENTED** - RBAC system with dynamic permission groups, fine-grained permissions, registry management, bulk operations, import/export, and search/filtering is fully operational.
-
 **Priority**: 🔴 CRITICAL (Foundation for flexible access control) - ✅ **COMPLETED**
-
-**Dependencies**:
-
-- Layer 1 (Static Roles) - ✅ Already implemented
-- Redis (for caching) - ⚠️ May need setup
-- MongoDB (for audit logging) - ✅ Already configured
 
 ---
 
@@ -181,30 +157,6 @@ This document outlines the development phases and tasks required to complete the
 
 **Status**: ✅ **IMPLEMENTED**
 
-**Completed Implementation:**
-
-- [x] Create `LogController` with aggregated endpoints:
-  - [x] `GET /api/v1/logs?type=all&limit=20` - Get aggregated logs from all collections (admin/owner only)
-  - [x] `GET /api/v1/logs/user-activity?limit=10` - Get user activity logs
-  - [x] `GET /api/v1/logs/security?limit=10` - Get security logs
-  - [x] `GET /api/v1/logs/portfolio?limit=10` - Get portfolio logs
-- [x] Create unified `LogResponse` DTO that can represent different log types
-- [x] Create `LogService` to aggregate logs from multiple MongoDB collections
-- [x] Authorization: OWNER/ADMIN only
-
-**Implementation Details:**
-
-- **Location**: `spring/src/main/java/com/hafizbahtiar/spring/features/logs`
-- **DTO**: `LogResponse` - Unified response for all log types (AUTH, USER_ACTIVITY, PORTFOLIO, PERMISSION)
-- **Service**: `LogService` - Aggregates logs from auth_logs, user_activity, portfolio_logs, permission_logs collections
-- **Controller**: `LogController` - REST endpoints with `@PreAuthorize("hasAnyRole('OWNER', 'ADMIN')")`
-- **Features**:
-  - Aggregates logs from multiple MongoDB collections
-  - Sorts by timestamp descending
-  - Supports filtering by log type (all, user-activity, security, portfolio)
-  - Limit validation (1-100, defaults to 20 for all, 10 for specific types)
-  - Error handling for individual collection failures (continues with other collections)
-
 **Priority**: MEDIUM (optional feature)
 
 ---
@@ -305,39 +257,170 @@ This document outlines the development phases and tasks required to complete the
 
 #### Phase 12: Dynamic Navigation Menu System (MEDIUM PRIORITY)
 
-**Status**: ⚠️ **PARTIALLY IMPLEMENTED** - Backend and frontend integration complete, data initialization pending.
+**Status**: ✅ **IMPLEMENTED** - Backend, frontend, data initialization, and UI improvements complete.
 
 > **Goal**: Replace hardcoded sidebar navigation with dynamic menu items stored in database, controlled by permissions.
 
-**Current State:**
-
-- ✅ Backend API complete (database schema, service layer, DTOs, controller)
-- ✅ Frontend integration complete (API client, navigation context, sidebar component)
-- ❌ Data initialization pending (default menu items not yet populated)
-
-**Required Implementation:**
-
-- [ ] **Data Initialization**
-
-  - [ ] Create database migration or initialization script to populate default menu items:
-    - [ ] Main Navigation: Home (`/dashboard`)
-    - [ ] Portfolio (OWNER only): Profile, Projects, Companies, Skills, Experiences, Education, Certifications, Blog, Testimonials, Contacts
-    - [ ] Admin (OWNER/ADMIN): Dashboard, Queues, Health, Cron Jobs, Metrics
-    - [ ] Settings (all authenticated users)
-  - [ ] Map icon names to Lucide React icon identifiers (e.g., "home", "briefcase", "settings")
-
-- [ ] **Integration with Permission System**
-  - [ ] Filter menu items based on user's group permissions (Layer 2 is now implemented)
-  - [ ] Check `required_permission_module` and `required_permission_page` against user's effective permissions
-  - [ ] Only show menu items user has READ access to
-
-**Estimated Time**: 3-4 days
-
-**Dependencies**: None (can be implemented independently, but will integrate with Layer 2 when available)
+**Priority**: MEDIUM - ✅ **COMPLETED**
 
 ---
 
-#### Phase 13: Optional Improvements
+#### Phase 13: Dynamic Cron Job Management System (Hybrid Approach)
+
+**Status**: ⚠️ **PHASES 1-7 IMPLEMENTED, TESTING PENDING**
+
+> **Goal**: Implement a hybrid cron job management system where OWNER can create and manage cron jobs. Supports both application-level (Spring `@Scheduled` with dynamic scheduling) and database-level (PostgreSQL `pg_cron`) job types.
+
+**Architecture Decision:**
+
+- **Application-Level Jobs**: Use Spring's `TaskScheduler` or Quartz Scheduler for dynamic scheduling. Jobs execute within Spring Boot context and can access Spring services.
+- **Database-Level Jobs**: Use PostgreSQL `pg_cron` extension for SQL-based jobs that run independently of the application.
+- **Storage**: All job definitions stored in PostgreSQL `cron_jobs` table.
+- **UI**: Owners can create/edit/delete jobs and choose job type (application or database).
+
+**Current State:**
+
+- ✅ Cron job monitoring exists (`/api/v1/admin/cron-jobs`) - read-only status and history
+- ✅ MongoDB logging for cron job executions exists
+- ✅ CRUD functionality for creating/managing jobs (Phases 1-7 completed)
+- ✅ Dynamic scheduler implementation (application-level and database-level)
+- ✅ `pg_cron` integration
+
+**Phase 8: Testing & Validation (CRITICAL)**
+
+- [ ] **Unit Tests**
+
+  - [ ] Test cron expression validation
+  - [ ] Test job scheduling/unscheduling
+  - [ ] Test job execution wrapper
+  - [ ] Test service layer CRUD operations
+
+- [ ] **Integration Tests**
+
+  - [ ] Test create/update/delete job via API
+  - [ ] Test job execution (manual and scheduled)
+  - [ ] Test enable/disable functionality
+  - [ ] Test `pg_cron` integration (if extension available)
+
+- [ ] **Manual Testing**
+  - [ ] Create application job and verify execution
+  - [ ] Create database job and verify execution (if `pg_cron` available)
+  - [ ] Test job enable/disable
+  - [ ] Test job update (rescheduling)
+  - [ ] Test job deletion
+  - [ ] Test error handling (invalid cron expression, invalid job class)
+
+**Estimated Time**: 5-7 days
+**Dependencies**:
+
+- PostgreSQL `pg_cron` extension (optional, for database jobs)
+- Quartz Scheduler or Spring `TaskScheduler` (for dynamic scheduling)
+
+**Frontend Dependencies:**
+- Frontend will create CRUD UI for cron job management once backend APIs are complete
+- See frontend TODO.md for UI implementation details
+
+**Priority**: MEDIUM (enhancement feature)
+
+---
+
+#### Phase 14: User Management & Role Management APIs
+
+**Status**: ✅ **IMPLEMENTED** - All APIs, permission checks, and business logic validations complete.
+
+> **⚠️ HIGH PRIORITY**: Implement backend APIs for User Management and Role Management pages as defined in the permission registry.
+
+**Implementation Summary:**
+
+- [x] **User Management APIs** ✅ **COMPLETED**
+  - [x] `GET /api/v1/admin/users` - List users with filters/pagination/search ✅
+  - [x] `GET /api/v1/admin/users/{id}` - Get user details ✅
+  - [x] `POST /api/v1/admin/users` - Create new user ✅
+  - [x] `PUT /api/v1/admin/users/{id}` - Update user ✅
+  - [x] `DELETE /api/v1/admin/users/{id}` - Delete/deactivate user ✅
+  - [x] `PATCH /api/v1/admin/users/{id}/role` - Change user role ✅
+  - [x] `GET /api/v1/admin/users/{id}/groups` - Get user's permission groups ✅
+  - [x] `POST /api/v1/admin/users/{id}/groups` - Assign groups to user ✅
+  - [x] `DELETE /api/v1/admin/users/{id}/groups/{groupId}` - Remove group from user ✅
+
+- [x] **Role Management APIs** ✅ **COMPLETED**
+  - [x] `GET /api/v1/admin/roles` - Get all roles with statistics (user count per role) ✅
+  - [x] `GET /api/v1/admin/roles/{role}/users` - Get users by role ✅
+  - [x] `GET /api/v1/admin/roles/{role}/permissions` - Get permissions for role (if applicable) ✅
+
+- [x] **Permission Checks** ✅ **COMPLETED**
+  - [x] Add `@PreAuthorize` checks for all endpoints:
+    - [x] `users.list` - View user list ✅
+    - [x] `create_user` - Create new user ✅
+    - [x] `edit_user` - Edit user ✅
+    - [x] `delete_user` - Delete user ✅
+    - [x] `change_role` - Change user role ✅
+    - [x] `users.roles` - View role management page ✅
+
+- [x] **Business Logic** ✅ **COMPLETED**
+  - [x] Prevent changing OWNER role (only one owner allowed) ✅
+  - [x] Prevent deleting OWNER user ✅
+  - [x] Validate role assignments (OWNER, ADMIN, USER only) ✅
+  - [x] Handle user deactivation (soft delete) ✅
+  - [x] Handle permission group assignments ✅
+
+**Files Created:**
+- `AdminUserController.java` - User management endpoints
+- `AdminRoleController.java` - Role management endpoints
+- `AdminUserCreateRequest.java` - DTO for creating users
+- `AdminUserUpdateRequest.java` - DTO for updating users
+- `ChangeRoleRequest.java` - DTO for role changes
+
+**Service Methods Added:**
+- `UserService.getUsersWithFilters()` - Paginated user list with search/filter
+- `UserService.createUser()` - Admin user creation
+- `UserService.updateUserActiveStatus()` - Activate/deactivate users
+
+**Repository Methods Added:**
+- `UserRepository.findUsersWithFilters()` - Paginated query with filters
+
+**Frontend Dependencies:**
+- Frontend expects these APIs to implement User Management (`/admin/users`) and Role Management (`/admin/roles`) pages
+- See frontend TODO.md for UI implementation details
+
+**Estimated Time**: 3-4 days
+**Priority**: HIGH (completes admin interface as per permission registry)
+
+---
+
+#### Phase 15: Portfolio Public View APIs
+
+**Status**: ❌ **NOT IMPLEMENTED**
+
+**Required Implementation:**
+
+- [ ] **Public Portfolio APIs**
+  - [ ] `GET /api/v1/portfolio/public/{username}` - Get public portfolio by username (read-only)
+  - [ ] `GET /api/v1/portfolio/public/{username}/projects` - Get public projects
+  - [ ] `GET /api/v1/portfolio/public/{username}/skills` - Get public skills
+  - [ ] `GET /api/v1/portfolio/public/{username}/experiences` - Get public experiences
+  - [ ] `GET /api/v1/portfolio/public/{username}/blogs` - Get public blog posts
+
+- [ ] **Portfolio Visibility Settings**
+  - [ ] Add `isPublic` field to portfolio settings
+  - [ ] Add visibility controls per portfolio section
+  - [ ] Add portfolio theme/settings entity
+
+- [ ] **Security**
+  - [ ] Ensure public endpoints don't expose sensitive data
+  - [ ] Add rate limiting for public endpoints
+  - [ ] Validate username format and existence
+
+**Frontend Dependencies:**
+- Frontend will create public portfolio page at `/portfolio/[username]`
+- See frontend TODO.md for UI implementation details
+
+**Estimated Time**: 2-3 days
+**Priority**: MEDIUM
+
+---
+
+#### Phase 16: Optional Improvements
 
 **Status**: ❌ **NOT IMPLEMENTED**
 
@@ -367,6 +450,6 @@ This document outlines the development phases and tasks required to complete the
 
 ---
 
-_Last Updated: January 3, 2026_
+_Last Updated: January 8, 2026_
 _Next Review: January 2026_
-_Current Focus: Phase 0 - RBAC System (✅ COMPLETED) → Email Verification (Critical) → Two-Token Auth Testing (High) → Webhook Integration (Medium)_
+_Current Focus: Phase 0 - RBAC System (✅ COMPLETED) → Phase 12 - Dynamic Navigation Menu (✅ COMPLETED) → Email Verification (Critical) → Two-Token Auth Testing (High) → Webhook Integration (Medium) → Dynamic Cron Job Management (Medium)_

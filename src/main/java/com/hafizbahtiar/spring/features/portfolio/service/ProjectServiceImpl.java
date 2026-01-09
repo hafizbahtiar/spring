@@ -2,6 +2,7 @@ package com.hafizbahtiar.spring.features.portfolio.service;
 
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectRequest;
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectResponse;
+import com.hafizbahtiar.spring.features.portfolio.entity.PlatformType;
 import com.hafizbahtiar.spring.features.portfolio.entity.Project;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectStatus;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectType;
@@ -77,7 +78,20 @@ public class ProjectServiceImpl implements ProjectService {
         // Validate URLs if provided
         validateUrl(request.getGithubUrl(), "GitHub URL");
         validateUrl(request.getLiveUrl(), "Live URL");
-        validateUrl(request.getImageUrl(), "Image URL");
+        // Validate deprecated imageUrl for backward compatibility
+        @SuppressWarnings("deprecation")
+        String imageUrl = request.getImageUrl();
+        if (imageUrl != null) {
+            validateUrl(imageUrl, "Image URL");
+        }
+        // Validate images array if provided
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            validateImageUrls(request.getImages());
+        }
+        // Validate roadmap items if provided
+        if (request.getRoadmap() != null && !request.getRoadmap().isEmpty()) {
+            validateRoadmap(request.getRoadmap());
+        }
 
         // Map request to entity
         Project project = projectMapper.toEntity(request);
@@ -125,7 +139,20 @@ public class ProjectServiceImpl implements ProjectService {
         // Validate URLs if provided
         validateUrl(request.getGithubUrl(), "GitHub URL");
         validateUrl(request.getLiveUrl(), "Live URL");
-        validateUrl(request.getImageUrl(), "Image URL");
+        // Validate deprecated imageUrl for backward compatibility
+        @SuppressWarnings("deprecation")
+        String imageUrl = request.getImageUrl();
+        if (imageUrl != null) {
+            validateUrl(imageUrl, "Image URL");
+        }
+        // Validate images array if provided
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            validateImageUrls(request.getImages());
+        }
+        // Validate roadmap items if provided
+        if (request.getRoadmap() != null && !request.getRoadmap().isEmpty()) {
+            validateRoadmap(request.getRoadmap());
+        }
 
         // Update entity from request
         projectMapper.updateEntityFromRequest(request, project);
@@ -248,6 +275,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ProjectResponse> getUserProjectsByPlatform(Long userId, PlatformType platform) {
+        log.debug("Fetching projects for user ID: {} by platform: {}", userId, platform);
+        List<Project> projects = platform != null
+                ? projectRepository.findByUserIdAndPlatformOrderByDisplayOrderAsc(userId, platform)
+                : projectRepository.findByUserIdOrderByDisplayOrderAsc(userId);
+        return projectMapper.toResponseList(projects);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ProjectResponse> getFeaturedProjects(Long userId) {
         log.debug("Fetching featured projects for user ID: {}", userId);
         List<Project> projects = projectRepository.findByUserIdAndIsFeaturedTrueOrderByDisplayOrderAsc(userId);
@@ -333,6 +370,52 @@ public class ProjectServiceImpl implements ProjectService {
                 new URL(url);
             } catch (MalformedURLException e) {
                 throw PortfolioException.invalidUrl(url, fieldName);
+            }
+        }
+    }
+
+    /**
+     * Validate multiple image URLs.
+     */
+    private void validateImageUrls(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < imageUrls.size(); i++) {
+            String imageUrl = imageUrls.get(i);
+            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+                // Allow relative paths (starting with /) or absolute URLs
+                if (imageUrl.startsWith("/")) {
+                    // Relative path - valid for frontend use
+                    continue;
+                }
+                // Validate absolute URL
+                try {
+                    new URL(imageUrl);
+                } catch (MalformedURLException e) {
+                    throw PortfolioException.invalidUrl(imageUrl, "Image URL at index " + i);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate roadmap items.
+     */
+    private void validateRoadmap(List<ProjectRequest.RoadmapItem> roadmap) {
+        if (roadmap == null || roadmap.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < roadmap.size(); i++) {
+            ProjectRequest.RoadmapItem item = roadmap.get(i);
+            if (item == null) {
+                throw PortfolioException.invalidInput("Roadmap item at index " + i + " cannot be null");
+            }
+            if (item.getDate() == null) {
+                throw PortfolioException.invalidInput("Roadmap item at index " + i + " must have a date");
+            }
+            if (item.getTitle() == null || item.getTitle().trim().isEmpty()) {
+                throw PortfolioException.invalidInput("Roadmap item at index " + i + " must have a title");
             }
         }
     }

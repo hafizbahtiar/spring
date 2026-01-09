@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * UserPrincipal implementation for Spring Security.
@@ -16,21 +17,23 @@ import java.util.Collections;
 public class UserPrincipal implements UserDetails {
 
     private final Long id;
+    private final UUID userUuid;
     private final String username;
     private final String email;
     private final String role;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, String username, String email, String role) {
+    public UserPrincipal(Long id, UUID userUuid, String username, String email, String role) {
         this.id = id;
+        this.userUuid = userUuid;
         this.username = username;
         this.email = email;
         this.role = role;
         this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
-    public static UserPrincipal create(Long id, String username, String email, String role) {
-        return new UserPrincipal(id, username, email, role);
+    public static UserPrincipal create(Long id, UUID userUuid, String username, String email, String role) {
+        return new UserPrincipal(id, userUuid, username, email, role);
     }
 
     public boolean isOwner() {

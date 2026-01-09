@@ -2,6 +2,8 @@ package com.hafizbahtiar.spring.features.user.repository;
 
 import com.hafizbahtiar.spring.features.user.entity.UserPreferences;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,11 +17,13 @@ public interface UserPreferencesRepository extends JpaRepository<UserPreferences
 
     /**
      * Find user preferences by user ID.
+     * Uses JOIN FETCH to eagerly load the User entity to avoid LazyInitializationException.
      *
      * @param userId User ID
-     * @return Optional UserPreferences
+     * @return Optional UserPreferences with User loaded
      */
-    Optional<UserPreferences> findByUserId(Long userId);
+    @Query("SELECT up FROM UserPreferences up JOIN FETCH up.user WHERE up.user.id = :userId")
+    Optional<UserPreferences> findByUserId(@Param("userId") Long userId);
 
     /**
      * Check if user preferences exist for a user.

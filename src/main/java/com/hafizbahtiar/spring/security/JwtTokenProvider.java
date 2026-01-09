@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -25,7 +26,8 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration:900000}") // 15 minutes default (900000 ms)
     private Long jwtExpiration;
 
-    @Value("${jwt.refresh.expiration:604800000}") // 7 days default (604800000 ms) - stored in database, not used here but available for reference
+    @Value("${jwt.refresh.expiration:604800000}") // 7 days default (604800000 ms) - stored in database, not used here
+                                                  // but available for reference
     private Long jwtRefreshExpiration;
 
     private SecretKey getSigningKey() {
@@ -38,16 +40,18 @@ public class JwtTokenProvider {
         return createToken(claims, userDetails.getUsername());
     }
 
-    public String generateToken(String username, Long userId, String role) {
+    public String generateToken(String username, Long userId, UUID userUuid, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
+        claims.put("userUuid", userUuid != null ? userUuid.toString() : null);
         claims.put("role", role);
         return createToken(claims, username);
     }
 
-    public String generateToken(String username, Long userId, String role, String sessionId) {
+    public String generateToken(String username, Long userId, UUID userUuid, String role, String sessionId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
+        claims.put("userUuid", userUuid != null ? userUuid.toString() : null);
         claims.put("role", role);
         if (sessionId != null) {
             claims.put("sessionId", sessionId);
@@ -80,6 +84,12 @@ public class JwtTokenProvider {
     public String getRoleFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
         return claims.get("role", String.class);
+    }
+
+    public UUID getUserUuidFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        String userUuidString = claims.get("userUuid", String.class);
+        return userUuidString != null ? UUID.fromString(userUuidString) : null;
     }
 
     public String getSessionIdFromToken(String token) {

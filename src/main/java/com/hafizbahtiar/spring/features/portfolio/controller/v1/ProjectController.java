@@ -9,6 +9,7 @@ import com.hafizbahtiar.spring.common.security.UserPrincipal;
 import com.hafizbahtiar.spring.common.util.ResponseUtils;
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectRequest;
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectResponse;
+import com.hafizbahtiar.spring.features.portfolio.entity.PlatformType;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectStatus;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectType;
 import com.hafizbahtiar.spring.features.portfolio.service.ProjectService;
@@ -73,20 +74,23 @@ public class ProjectController {
      * GET /api/v1/portfolio/projects
      * Requires: OWNER/ADMIN role OR portfolio.projects page READ permission
      * Supports pagination via Pageable parameter (page, size, sort)
-     * Query params: status, type, featured, startDate, endDate, page, size, sort
+     * Query params: status, type, platform, featured, startDate, endDate, page,
+     * size, sort
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('OWNER', 'ADMIN') or @securityUtils.hasPermission('PAGE', 'portfolio', 'portfolio.projects', 'READ')")
     public ResponseEntity<ApiResponse<PaginatedResponse<ProjectResponse>>> getUserProjects(
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) ProjectType type,
+            @RequestParam(required = false) PlatformType platform,
             @RequestParam(required = false, defaultValue = "false") Boolean featured,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @PageableDefault(size = 10, sort = "displayOrder") Pageable pageable) {
         Long userId = getCurrentUserId();
-        log.debug("Fetching projects for user ID: {}, status: {}, type: {}, featured: {}, page: {}, size: {}",
-                userId, status, type, featured, pageable.getPageNumber(), pageable.getPageSize());
+        log.debug(
+                "Fetching projects for user ID: {}, status: {}, type: {}, platform: {}, featured: {}, page: {}, size: {}",
+                userId, status, type, platform, featured, pageable.getPageNumber(), pageable.getPageSize());
 
         // If specific filters are provided, return non-paginated list (for backward
         // compatibility)
@@ -109,6 +113,10 @@ public class ProjectController {
             return ResponseUtils.okPage(page);
         } else if (type != null) {
             List<ProjectResponse> projects = projectService.getUserProjectsByType(userId, type);
+            Page<ProjectResponse> page = new PageImpl<>(projects, pageable, projects.size());
+            return ResponseUtils.okPage(page);
+        } else if (platform != null) {
+            List<ProjectResponse> projects = projectService.getUserProjectsByPlatform(userId, platform);
             Page<ProjectResponse> page = new PageImpl<>(projects, pageable, projects.size());
             return ResponseUtils.okPage(page);
         } else if (startDate != null && endDate != null) {

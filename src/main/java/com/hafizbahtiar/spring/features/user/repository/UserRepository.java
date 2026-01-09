@@ -1,6 +1,8 @@
 package com.hafizbahtiar.spring.features.user.repository;
 
 import com.hafizbahtiar.spring.features.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,4 +62,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Find user with OWNER role (if exists)
     @Query("SELECT u FROM User u WHERE UPPER(u.role) = 'OWNER' AND u.active = true")
     Optional<User> findOwner();
+
+    // Pagination and search methods for admin
+    @Query("SELECT u FROM User u WHERE " +
+            "(:search IS NULL OR :search = '' OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+            "(:role IS NULL OR :role = '' OR u.role = :role) AND " +
+            "(:active IS NULL OR u.active = :active)")
+    Page<User> findUsersWithFilters(
+            @Param("search") String search,
+            @Param("role") String role,
+            @Param("active") Boolean active,
+            Pageable pageable);
 }

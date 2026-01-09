@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST controller for portfolio summary endpoint.
@@ -70,9 +71,9 @@ public class PortfolioController {
         List<EducationResponse> educations = educationService.getUserEducations(userId);
 
         // Get user info
-        String username = userRepository.findById(userId)
-                .map(user -> user.getUsername())
-                .orElse(null);
+        User user = userRepository.findById(userId).orElse(null);
+        String username = user != null ? user.getUsername() : null;
+        UUID userUuid = user != null ? user.getUuid() : null;
 
         // Build statistics
         PortfolioSummaryResponse.PortfolioStats stats = PortfolioSummaryResponse.PortfolioStats.builder()
@@ -88,6 +89,7 @@ public class PortfolioController {
         // Build summary response
         PortfolioSummaryResponse summary = PortfolioSummaryResponse.builder()
                 .userId(userId)
+                .userUuid(userUuid)
                 .username(username)
                 .skills(skills)
                 .experiences(experiences)
@@ -140,6 +142,7 @@ public class PortfolioController {
         // Build summary response
         PortfolioSummaryResponse summary = PortfolioSummaryResponse.builder()
                 .userId(userId)
+                .userUuid(user.getUuid())
                 .username(username)
                 .skills(skills)
                 .experiences(experiences)
@@ -190,6 +193,7 @@ public class PortfolioController {
         // Build summary response
         PortfolioSummaryResponse summary = PortfolioSummaryResponse.builder()
                 .userId(userId)
+                .userUuid(user.getUuid())
                 .username(user.getUsername())
                 .skills(skills)
                 .experiences(experiences)

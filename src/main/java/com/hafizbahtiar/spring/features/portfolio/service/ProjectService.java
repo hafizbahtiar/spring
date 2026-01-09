@@ -3,6 +3,7 @@ package com.hafizbahtiar.spring.features.portfolio.service;
 import com.hafizbahtiar.spring.common.dto.BulkDeleteResponse;
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectRequest;
 import com.hafizbahtiar.spring.features.portfolio.dto.ProjectResponse;
+import com.hafizbahtiar.spring.features.portfolio.entity.PlatformType;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectStatus;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectType;
 import org.springframework.data.domain.Page;
@@ -97,6 +98,15 @@ public interface ProjectService {
      * @return List of ProjectResponse
      */
     List<ProjectResponse> getUserProjectsByType(Long userId, ProjectType type);
+
+    /**
+     * Get projects filtered by platform.
+     *
+     * @param userId   User ID
+     * @param platform Project platform (optional)
+     * @return List of ProjectResponse
+     */
+    List<ProjectResponse> getUserProjectsByPlatform(Long userId, PlatformType platform);
 
     /**
      * Get featured projects for a user.

@@ -2,6 +2,7 @@ package com.hafizbahtiar.spring.features.portfolio.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.hafizbahtiar.spring.features.portfolio.entity.PlatformType;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectStatus;
 import com.hafizbahtiar.spring.features.portfolio.entity.ProjectType;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,35 @@ public class ProjectResponse {
     private List<String> technologies;
     private String githubUrl;
     private String liveUrl;
+    
+    /**
+     * Project image URL (kept for backward compatibility)
+     * @deprecated Use images list instead
+     */
+    @Deprecated
     private String imageUrl;
+    
+    /**
+     * Project images (list of image URLs)
+     * Used for displaying multiple images like Google Play Store screenshots
+     */
+    private List<String> images;
+    
+    /**
+     * Project platform type
+     */
+    private PlatformType platform;
+    private String platformDisplayName;
+    
+    /**
+     * Project roadmap/timeline
+     */
+    private List<RoadmapItem> roadmap;
+    
+    /**
+     * Case study content
+     */
+    private String caseStudy;
     private LocalDate startDate;
     private LocalDate endDate;
     private String address;
@@ -52,4 +81,17 @@ public class ProjectResponse {
     // Nested skill summaries (optional, if project has associated skills)
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<SkillResponse.Summary> skills;
+
+    /**
+     * Inner class for roadmap timeline items
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RoadmapItem {
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        private LocalDate date;
+        private String title;
+        private String description;
+    }
 }

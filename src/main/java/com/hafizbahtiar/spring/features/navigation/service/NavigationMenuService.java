@@ -92,4 +92,12 @@ public interface NavigationMenuService {
      * @return List of all NavigationMenuItemResponse
      */
     List<NavigationMenuItemResponse> getAllMenuItems();
+
+    /**
+     * Get distinct group labels (for admin management).
+     * Returns all unique group labels from active menu items.
+     *
+     * @return List of distinct group labels
+     */
+    List<String> getGroupLabels();
 }

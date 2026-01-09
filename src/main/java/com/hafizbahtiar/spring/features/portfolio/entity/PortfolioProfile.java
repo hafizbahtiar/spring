@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Portfolio Profile entity for storing user's portfolio-specific profile information.
@@ -18,7 +19,8 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "portfolio_profiles", indexes = {
-        @Index(name = "idx_portfolio_profiles_user_id", columnList = "user_id", unique = true)
+        @Index(name = "idx_portfolio_profiles_user_id", columnList = "user_id", unique = true),
+        @Index(name = "idx_portfolio_profiles_uuid", columnList = "uuid", unique = true)
 })
 @Getter
 @Setter
@@ -28,6 +30,13 @@ public class PortfolioProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * Public UUID for portfolio profile identification (exposed in APIs)
+     * Generated automatically on creation via @PrePersist
+     */
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID uuid;
 
     /**
      * User who owns this profile (one-to-one relationship)
@@ -106,5 +115,15 @@ public class PortfolioProfile {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    /**
+     * Generate UUID before persisting if not already set
+     */
+    @PrePersist
+    protected void generateUuid() {
+        if (this.uuid == null) {
+            this.uuid = UUID.randomUUID();
+        }
+    }
 }
 

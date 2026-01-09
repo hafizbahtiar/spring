@@ -96,7 +96,7 @@ public class CurrencyPreferencesServiceImpl implements CurrencyPreferencesServic
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CurrencyPreferencesResponse getCurrencyPreferences(Long userId) {
         log.debug("Fetching currency preferences for user ID: {}", userId);
 
@@ -105,6 +105,7 @@ public class CurrencyPreferencesServiceImpl implements CurrencyPreferencesServic
                 .orElseThrow(() -> UserNotFoundException.byId(userId));
 
         // Get or create preferences
+        // Note: Cannot use readOnly=true because we may need to create preferences
         CurrencyPreferences preferences = currencyPreferencesRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     log.info("Creating default currency preferences for user ID: {}", userId);

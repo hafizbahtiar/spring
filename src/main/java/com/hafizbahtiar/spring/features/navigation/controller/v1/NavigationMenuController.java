@@ -6,6 +6,7 @@ import com.hafizbahtiar.spring.common.util.ResponseUtils;
 import com.hafizbahtiar.spring.features.navigation.dto.CreateMenuItemRequest;
 import com.hafizbahtiar.spring.features.navigation.dto.MenuItemsResponse;
 import com.hafizbahtiar.spring.features.navigation.dto.NavigationMenuItemResponse;
+import com.hafizbahtiar.spring.features.navigation.dto.ReorderMenuItemsRequest;
 import com.hafizbahtiar.spring.features.navigation.dto.UpdateMenuItemRequest;
 import com.hafizbahtiar.spring.features.navigation.service.NavigationMenuService;
 import jakarta.validation.Valid;
@@ -90,6 +91,21 @@ public class NavigationMenuController {
     }
 
     /**
+     * Get distinct group labels (for admin management)
+     * GET /api/v1/navigation/menu/groups
+     * Requires: OWNER (always) or ADMIN (with permission)
+     * TODO: When Layer 2 permissions are implemented, replace hasRole('ADMIN') with
+     * permission check
+     */
+    @GetMapping("/menu/groups")
+    @PreAuthorize("hasRole('OWNER') or hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<String>>> getGroupLabels() {
+        log.debug("Fetching distinct group labels for admin management");
+        List<String> response = navigationMenuService.getGroupLabels();
+        return ResponseUtils.ok(response);
+    }
+
+    /**
      * Get single menu item by ID
      * GET /api/v1/navigation/menu/items/{id}
      * Requires: OWNER (always) or ADMIN (with permission)
@@ -161,9 +177,20 @@ public class NavigationMenuController {
      */
     @PutMapping("/menu/items/reorder")
     @PreAuthorize("hasRole('OWNER') or hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> reorderMenuItems(@RequestBody List<Long> orderedIds) {
-        log.info("Menu items reorder request received for {} items", orderedIds != null ? orderedIds.size() : 0);
-        navigationMenuService.reorderMenuItems(orderedIds);
-        return ResponseUtils.ok(null, "Menu items reordered successfully");
+    public ResponseEntity<ApiResponse<Void>> reorderMenuItems(
+            @Valid @RequestBody ReorderMenuItemsRequest request) {
+        log.info("Menu items reorder request received for {} items",
+                request.getOrderedIds() != null ? request.getOrderedIds().size() : 0);
+
+        try {
+            navigationMenuService.reorderMenuItems(request.getOrderedIds());
+            return ResponseUtils.ok(null, "Menu items reordered successfully");
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid reorder request: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error reordering menu items", e);
+            throw new RuntimeException("Failed to reorder menu items: " + e.getMessage(), e);
+        }
     }
 }

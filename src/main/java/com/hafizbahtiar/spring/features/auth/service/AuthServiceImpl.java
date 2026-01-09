@@ -93,6 +93,7 @@ public class AuthServiceImpl implements AuthService {
             String token = jwtTokenProvider.generateToken(
                     user.getEmail(),
                     user.getId(),
+                    user.getUuid(),
                     user.getRole(),
                     sessionId);
 
@@ -267,6 +268,7 @@ public class AuthServiceImpl implements AuthService {
             String newToken = jwtTokenProvider.generateToken(
                     user.getEmail(),
                     user.getId(),
+                    user.getUuid(),
                     user.getRole(),
                     session.getSessionId());
 

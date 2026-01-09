@@ -37,6 +37,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/portfolio/testimonials/public").permitAll() // Public
                                                                                                                       // portfolio
                                                                                                                       // view
+                                                // File serving endpoints (avatars, blog covers, etc.)
+                                                .requestMatchers("/api/v1/files/avatars/**").permitAll()
+                                                .requestMatchers("/api/v1/files/blog-covers/**").permitAll()
                                                 // Protected endpoints
                                                 .anyRequest().authenticated())
                                 .sessionManagement(session -> session

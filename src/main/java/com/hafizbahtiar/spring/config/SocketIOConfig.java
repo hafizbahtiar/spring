@@ -6,14 +6,17 @@ import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Role;
 
 /**
  * Socket.IO server configuration for real-time monitoring.
  */
 @org.springframework.context.annotation.Configuration
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 @Slf4j
 public class SocketIOConfig {
 
@@ -32,7 +35,7 @@ public class SocketIOConfig {
     @Value("${socketio.ping-interval:25000}")
     private int pingInterval;
 
-    @Value("${socketio.max-frame-payload-length:1048576}")
+    @Value("${socketio.max-frame-payload-length:10485760}")
     private int maxFramePayloadLength;
 
     @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
@@ -41,6 +44,8 @@ public class SocketIOConfig {
     private SocketIOServer server;
 
     @Bean
+    @Lazy
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     public SocketIOServer socketIOServer() {
         Configuration config = new Configuration();
         config.setHostname(hostname);
@@ -72,14 +77,15 @@ public class SocketIOConfig {
             }
             throw new RuntimeException("Failed to start Socket.IO server", e);
         }
-        
+
         return server;
     }
 
     /**
      * Enable Spring annotation scanning for Socket.IO event handlers.
      * Made static to avoid BeanPostProcessor warnings.
-     * Uses @Lazy to defer initialization until after all BeanPostProcessors are registered.
+     * Uses @Lazy to defer initialization until after all BeanPostProcessors are
+     * registered.
      */
     @Bean
     @DependsOn("socketIOServer")

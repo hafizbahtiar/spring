@@ -60,6 +60,7 @@ public interface UserMapper {
     List<UserResponse> toResponseList(List<User> users);
 
     @Mapping(target = "id", source = "id")
+    @Mapping(target = "uuid", source = "uuid")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "username", source = "username")
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
@@ -70,4 +71,3 @@ public interface UserMapper {
 
     List<UserResponse.Summary> toSummaryList(List<User> users);
 }
-

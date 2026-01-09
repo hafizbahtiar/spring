@@ -6,6 +6,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import com.corundumstudio.socketio.annotation.OnEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hafizbahtiar.spring.features.admin.dto.HealthCheckResponse;
 import com.hafizbahtiar.spring.features.admin.dto.SystemMetricsResponse;
 import com.hafizbahtiar.spring.features.admin.service.AdminHealthService;
@@ -36,6 +37,7 @@ public class MonitoringSocketHandler {
     private final AdminHealthService adminHealthService;
     private final AdminMetricsService adminMetricsService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
 
     // Store authenticated clients
     private final Map<String, SocketIOClient> authenticatedClients = new ConcurrentHashMap<>();
@@ -205,9 +207,10 @@ public class MonitoringSocketHandler {
             HealthCheckResponse systemHealth = adminHealthService.getSystemHealth();
             SystemMetricsResponse systemMetrics = adminMetricsService.getSystemMetrics();
 
+            // Serialize DTOs to Maps using ObjectMapper to handle LocalDateTime properly
             Map<String, Object> data = new HashMap<>();
-            data.put("systemHealth", systemHealth);
-            data.put("systemMetrics", systemMetrics);
+            data.put("systemHealth", objectMapper.convertValue(systemHealth, Map.class));
+            data.put("systemMetrics", objectMapper.convertValue(systemMetrics, Map.class));
             data.put("timestamp", LocalDateTime.now().toString());
 
             client.sendEvent("monitoring:initial", data);
@@ -226,9 +229,10 @@ public class MonitoringSocketHandler {
             HealthCheckResponse systemHealth = adminHealthService.getSystemHealth();
             SystemMetricsResponse systemMetrics = adminMetricsService.getSystemMetrics();
 
+            // Serialize DTOs to Maps using ObjectMapper to handle LocalDateTime properly
             Map<String, Object> data = new HashMap<>();
-            data.put("systemHealth", systemHealth);
-            data.put("systemMetrics", systemMetrics);
+            data.put("systemHealth", objectMapper.convertValue(systemHealth, Map.class));
+            data.put("systemMetrics", objectMapper.convertValue(systemMetrics, Map.class));
             data.put("timestamp", LocalDateTime.now().toString());
 
             client.sendEvent("monitoring:update", data);
@@ -262,9 +266,10 @@ public class MonitoringSocketHandler {
             HealthCheckResponse systemHealth = adminHealthService.getSystemHealth();
             SystemMetricsResponse systemMetrics = adminMetricsService.getSystemMetrics();
 
+            // Serialize DTOs to Maps using ObjectMapper to handle LocalDateTime properly
             Map<String, Object> data = new HashMap<>();
-            data.put("systemHealth", systemHealth);
-            data.put("systemMetrics", systemMetrics);
+            data.put("systemHealth", objectMapper.convertValue(systemHealth, Map.class));
+            data.put("systemMetrics", objectMapper.convertValue(systemMetrics, Map.class));
             data.put("timestamp", LocalDateTime.now().toString());
 
             // Broadcast to all authenticated clients

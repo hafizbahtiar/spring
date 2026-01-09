@@ -63,6 +63,8 @@ public interface PortfolioProfileMapper {
      * Convert PortfolioProfile entity to PortfolioProfileResponse.
      */
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "user.uuid", target = "userUuid")
+    @Mapping(source = "uuid", target = "uuid")
     @Mapping(target = "socialLinks", expression = "java(convertObjectToSocialLinks(profile.getSocialLinks()))")
     @Mapping(target = "preferences", expression = "java(convertObjectToPreferences(profile.getPreferences()))")
     PortfolioProfileResponse toResponse(PortfolioProfile profile);

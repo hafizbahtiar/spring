@@ -47,7 +47,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public NotificationPreferencesResponse getNotificationPreferences(Long userId) {
         log.debug("Fetching notification preferences for user ID: {}", userId);
 
@@ -56,6 +56,7 @@ public class NotificationPreferencesServiceImpl implements NotificationPreferenc
                 .orElseThrow(() -> UserNotFoundException.byId(userId));
 
         // Get or create preferences
+        // Note: Cannot use readOnly=true because we may need to create preferences
         NotificationPreferences preferences = notificationPreferencesRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     log.info("Creating default notification preferences for user ID: {}", userId);

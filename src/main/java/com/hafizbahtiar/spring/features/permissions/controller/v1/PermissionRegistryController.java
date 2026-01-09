@@ -72,10 +72,10 @@ public class PermissionRegistryController {
 
     /**
      * Get available modules that the current user can assign to groups
-     * GET /api/v1/permissions/modules
+     * GET /api/v1/permissions/modules/available
      * Requires: Authenticated user
      */
-    @GetMapping("/modules")
+    @GetMapping("/modules/available")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<ModuleResponse>>> getAvailableModules() {
         Long userId = getCurrentUserId();

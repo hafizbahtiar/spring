@@ -2,6 +2,8 @@ package com.hafizbahtiar.spring.features.user.repository;
 
 import com.hafizbahtiar.spring.features.user.entity.NotificationPreferences;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,11 +17,13 @@ public interface NotificationPreferencesRepository extends JpaRepository<Notific
 
     /**
      * Find notification preferences by user ID.
+     * Uses JOIN FETCH to eagerly load the User entity to avoid LazyInitializationException.
      *
      * @param userId User ID
-     * @return Optional NotificationPreferences
+     * @return Optional NotificationPreferences with User loaded
      */
-    Optional<NotificationPreferences> findByUserId(Long userId);
+    @Query("SELECT np FROM NotificationPreferences np JOIN FETCH np.user WHERE np.user.id = :userId")
+    Optional<NotificationPreferences> findByUserId(@Param("userId") Long userId);
 
     /**
      * Check if notification preferences exist for a user.

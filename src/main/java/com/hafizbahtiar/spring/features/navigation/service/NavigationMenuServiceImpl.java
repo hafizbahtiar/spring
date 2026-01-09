@@ -211,22 +211,34 @@ public class NavigationMenuServiceImpl implements NavigationMenuService {
     }
 
     @Override
+    @Transactional
     public void reorderMenuItems(List<Long> orderedIds) {
         log.debug("Reordering {} menu items", orderedIds.size());
 
         if (orderedIds == null || orderedIds.isEmpty()) {
+            log.warn("Received empty or null orderedIds list for reorder operation");
             return;
         }
 
-        for (int i = 0; i < orderedIds.size(); i++) {
-            Long id = orderedIds.get(i);
+        // Validate all IDs exist before processing
+        List<NavigationMenuItem> menuItems = new ArrayList<>();
+        for (Long id : orderedIds) {
+            if (id == null) {
+                throw new IllegalArgumentException("Menu item ID cannot be null");
+            }
             NavigationMenuItem menuItem = navigationMenuItemRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Menu item not found: " + id));
-            menuItem.setDisplayOrder(i + 1);
-            navigationMenuItemRepository.save(menuItem);
+            menuItems.add(menuItem);
         }
 
-        log.debug("Reordered {} menu items", orderedIds.size());
+        // Update display order for all items
+        for (int i = 0; i < menuItems.size(); i++) {
+            menuItems.get(i).setDisplayOrder(i + 1);
+        }
+
+        // Batch save all items
+        navigationMenuItemRepository.saveAll(menuItems);
+        log.debug("Reordered {} menu items", menuItems.size());
     }
 
     @Override
@@ -251,6 +263,13 @@ public class NavigationMenuServiceImpl implements NavigationMenuService {
         return menuItems.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getGroupLabels() {
+        log.debug("Getting distinct group labels");
+        return navigationMenuItemRepository.findDistinctGroupLabels();
     }
 
     /**
