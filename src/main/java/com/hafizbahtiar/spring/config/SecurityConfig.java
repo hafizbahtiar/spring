@@ -30,10 +30,12 @@ public class SecurityConfig {
                                                 // Public endpoints
                                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                                 .requestMatchers("/api/v1/users").permitAll() // Registration
+                                                .requestMatchers("/api/v1/users/by-username/**").permitAll() // Public user lookup
                                                 .requestMatchers("/api/v1/subscription-plans/**").permitAll() // Public
                                                                                                               // subscription
                                                                                                               // plans
                                                 .requestMatchers("/api/v1/portfolio/public/**").permitAll()
+                                                .requestMatchers("/api/v1/portfolio/contacts/public").permitAll() // Public contact form
                                                 .requestMatchers("/api/v1/portfolio/testimonials/public").permitAll() // Public
                                                                                                                       // portfolio
                                                                                                                       // view

@@ -28,6 +28,14 @@ public interface UserService {
     UserResponse getById(Long id);
 
     /**
+     * Get user by username
+     *
+     * @param username Username
+     * @return UserResponse
+     */
+    UserResponse getUserByUsername(String username);
+
+    /**
      * Get user profile by ID
      *
      * @param id User ID

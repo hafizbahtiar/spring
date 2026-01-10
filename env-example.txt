@@ -15,8 +15,8 @@ LOGGING_LEVEL_COM_HAFIZBAHTIAR_SPRING=DEBUG
 # PRIMARY DATABASE: PostgreSQL
 # ============================================================================
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/console
-SPRING_DATASOURCE_USERNAME=console
-SPRING_DATASOURCE_PASSWORD=console_2025!
+SPRING_DATASOURCE_USERNAME=
+SPRING_DATASOURCE_PASSWORD=
 SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
 
 # JPA/Hibernate Configuration

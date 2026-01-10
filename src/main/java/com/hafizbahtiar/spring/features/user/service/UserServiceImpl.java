@@ -188,6 +188,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public UserResponse getUserByUsername(String username) {
+        log.debug("Fetching user with username: {}", username);
+        User user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> UserNotFoundException.byUsername(username));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserProfileResponse getProfileById(Long id) {
         log.debug("Fetching user profile with ID: {}", id);
         User user = userRepository.findById(id)

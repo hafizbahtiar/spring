@@ -160,6 +160,17 @@ public class UserController {
     }
 
     /**
+     * Get user by username (public endpoint for portfolio contact forms)
+     * GET /api/v1/users/by-username/{username}
+     */
+    @GetMapping("/by-username/{username}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByUsername(@PathVariable String username) {
+        log.debug("Getting user by username: {}", username);
+        UserResponse user = userService.getUserByUsername(username);
+        return ResponseUtils.ok(user);
+    }
+
+    /**
      * Get current authenticated user ID
      */
     private Long getCurrentUserId() {

@@ -48,22 +48,32 @@ public class ContactController {
     }
 
     /**
-     * Create a new contact (submit contact form)
+     * Create a new contact (submit contact form) - Public endpoint
+     * POST /api/v1/portfolio/contacts/public
+     * Allows anonymous users to submit contact forms when userId is provided
+     * Requires: userId as query parameter
+     */
+    @PostMapping("/public")
+    public ResponseEntity<ApiResponse<ContactResponse>> createPublicContact(
+            @Valid @RequestBody ContactRequest request,
+            @RequestParam Long userId) {
+        log.info("Public contact creation request received for user ID: {}, from: {}", userId, request.getEmail());
+        ContactResponse response = contactService.createContact(userId, request);
+        return ResponseUtils.created(response, "Contact message sent successfully");
+    }
+
+    /**
+     * Create a new contact (submit contact form) - Authenticated endpoint
      * POST /api/v1/portfolio/contacts
-     * Requires: Authenticated user OR public (if userId provided in request)
-     * Note: For public contact forms, userId should be provided in the request body
-     * or as query param
+     * Requires: Authenticated user
      */
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<ContactResponse>> createContact(
-            @Valid @RequestBody ContactRequest request,
-            @RequestParam(required = false) Long userId) {
-        // Use userId from query param if provided (for public forms), otherwise use
-        // authenticated user
-        Long targetUserId = userId != null ? userId : getCurrentUserId();
-        log.info("Contact creation request received for user ID: {}, from: {}", targetUserId, request.getEmail());
-        ContactResponse response = contactService.createContact(targetUserId, request);
+    public ResponseEntity<ApiResponse<ContactResponse>> createContact(@Valid @RequestBody ContactRequest request) {
+        Long userId = getCurrentUserId();
+        log.info("Authenticated contact creation request received for user ID: {}, from: {}", userId,
+                request.getEmail());
+        ContactResponse response = contactService.createContact(userId, request);
         return ResponseUtils.created(response, "Contact message sent successfully");
     }
 
